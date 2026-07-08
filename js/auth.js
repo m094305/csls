@@ -34,17 +34,6 @@ const AuthUI = {
                     this.setLoggedIn(data.user);
                     const newUrl = window.location.pathname + window.location.hash;
                     window.history.replaceState({}, document.title, newUrl);
-                } else {
-                    // Auto-signup if account does not exist
-                    this.signup(trimmedName).then(signupData => {
-                        if (signupData && !signupData.error) {
-                            this.setLoggedIn(signupData.user);
-                            const newUrl = window.location.pathname + window.location.hash;
-                            window.history.replaceState({}, document.title, newUrl);
-                        } else {
-                            console.error("Auto-login & signup failed:", signupData ? signupData.error : "Unknown error");
-                        }
-                    });
                 }
             }).catch(err => {
                 console.error("Auto-login request failed:", err);
@@ -62,8 +51,12 @@ const AuthUI = {
         return res.json();
     },
 
-    login(name)  { return this._post('login',  { name }); },
-    signup(name) { return this._post('signup', { name }); },
+    login(name) { return this._post('login', { name }); },
+
+    signup(name, hours, faceitElo, premierElo) {
+        return this._post('signup', { name, hours, faceitElo, premierElo });
+    },
+
     logout() {
         sessionStorage.removeItem('operator_user');
         this.setLoggedOut();
@@ -73,16 +66,19 @@ const AuthUI = {
     setLoggedIn(user) {
         this.currentUser = user;
         sessionStorage.setItem('operator_user', JSON.stringify(user));
-        document.getElementById('auth-btn').style.display      = 'none';
+        document.getElementById('auth-btn').style.display = 'none';
         const chip = document.getElementById('user-chip');
         chip.querySelector('.user-chip-name').textContent = user.name;
         chip.style.display = 'flex';
+        // Refresh comments so new user can post
+        if (typeof loadComments === 'function') loadComments();
     },
 
     setLoggedOut() {
         this.currentUser = null;
-        document.getElementById('auth-btn').style.display   = 'inline-flex';
-        document.getElementById('user-chip').style.display  = 'none';
+        document.getElementById('auth-btn').style.display = 'inline-flex';
+        document.getElementById('user-chip').style.display = 'none';
+        if (typeof loadComments === 'function') loadComments();
     },
 
     // ── Modal ─────────────────────────────────────────────────────────────
@@ -106,6 +102,16 @@ const AuthUI = {
             isLogin ? 'LOG IN' : 'CREATE ACCOUNT';
         document.getElementById('auth-modal').dataset.mode = tab;
         document.getElementById('auth-message').textContent = '';
+
+        // Show / hide signup stats fields
+        const signupFields = document.getElementById('auth-signup-fields');
+        if (signupFields) {
+            signupFields.style.display = isLogin ? 'none' : 'block';
+            ['auth-hours', 'auth-faceit', 'auth-premier'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.required = !isLogin;
+            });
+        }
     },
 
     showMessage(text, isError = true) {
@@ -147,9 +153,30 @@ const AuthUI = {
 
                 this.setSubmitState(true, mode);
                 try {
-                    const data = mode === 'login'
-                        ? await this.login(name)
-                        : await this.signup(name);
+                    let data;
+                    if (mode === 'login') {
+                        data = await this.login(name);
+                    } else {
+                        const hours     = parseInt(document.getElementById('auth-hours').value, 10);
+                        const faceitElo = parseInt(document.getElementById('auth-faceit').value, 10);
+                        const premierElo = parseInt(document.getElementById('auth-premier').value, 10);
+                        if (!hours && hours !== 0) {
+                            this.showMessage('In-game hours are required.', true);
+                            this.setSubmitState(false, mode);
+                            return;
+                        }
+                        if (!faceitElo) {
+                            this.showMessage('Faceit Elo is required.', true);
+                            this.setSubmitState(false, mode);
+                            return;
+                        }
+                        if (!premierElo && premierElo !== 0) {
+                            this.showMessage('Premier Elo is required.', true);
+                            this.setSubmitState(false, mode);
+                            return;
+                        }
+                        data = await this.signup(name, hours, faceitElo, premierElo);
+                    }
 
                     if (data.error) {
                         this.showMessage(data.error, true);
@@ -175,3 +202,4 @@ const AuthUI = {
         });
     }
 };
+
