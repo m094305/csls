@@ -25,7 +25,21 @@
         </div>
         <nav class="navbar-links">
             <button class="nav-btn active" id="nav-home">HQ</button>
-            <button class="nav-btn" id="nav-maps">MAPS</button>
+            
+            <div class="nav-dropdown-container">
+                <button class="nav-dropdown-btn" id="nav-menu-btn">
+                    <span>OPERATIONS</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" class="dropdown-arrow" style="vertical-align: middle;">
+                        <path fill="currentColor" d="M7 10l5 5 5-5H7z"/>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-content" id="nav-dropdown-menu">
+                    <a href="#maps" class="dropdown-item">MAPS</a>
+                    <a href="#about" class="dropdown-item">ABOUT US</a>
+                    <a href="#contacts" class="dropdown-item">CONTACTS</a>
+                </div>
+            </div>
+
             <div id="auth-nav-area" class="auth-nav-area">
                 <!-- Shown when logged out -->
                 <button class="auth-nav-btn" id="auth-btn">
@@ -49,13 +63,82 @@
 
         <!-- ── VIEW 1: HOME ─────────────────────────────── -->
         <section id="view-home" class="view-section active">
+            <div class="home-background-slideshow">
+                <div class="slide active" style="background-image: linear-gradient(rgba(10, 13, 16, 0.75), rgba(10, 13, 16, 0.9)), url('pictures/cs2_bg_dust2.png');"></div>
+                <div class="slide" style="background-image: linear-gradient(rgba(10, 13, 16, 0.75), rgba(10, 13, 16, 0.9)), url('pictures/cs2_bg_mirage.png');"></div>
+                <div class="slide" style="background-image: linear-gradient(rgba(10, 13, 16, 0.75), rgba(10, 13, 16, 0.9)), url('pictures/cs2_bg_inferno.png');"></div>
+            </div>
+
             <div class="hero-container">
                 <div class="hud-status">
                     <span class="status-indicator-dot animated-glow"></span>
-                    <span class="status-text">STATUS: ACTIVE TRAINING OPERATION</span>
+                    <span class="status-text">SYSTEM ONLINE: SOURCE 2 ENABLED</span>
                 </div>
-                <h1 class="hero-title">ELEVATE YOUR GAMEPLAY</h1>
-                <p class="hero-subtitle">Tactical coordination, utility lineups, and positional mastery.</p>
+                
+                <div class="hero-header-box">
+                    <h1 class="hero-title">Welcome to the Counter Strike 2 learning platform</h1>
+                    <p class="hero-subtitle">Where you can learn everything or teach it to others.</p>
+                </div>
+
+                <div class="hero-grid">
+                    <div class="info-box border-glow" onclick="window.location.hash = 'maps'">
+                        <div class="info-box-num">01</div>
+                        <h3 class="info-box-title">ACTIVE MAP POOL</h3>
+                        <p class="info-box-text" style="font-size: 13px;">
+                            <strong>FACEIT Map Pool:</strong> Dust II, Mirage, Nuke, Inferno, Ancient, Anubis, Train.
+                        </p>
+                        <span class="info-box-link">LAUNCH DEPLOYMENT &rarr;</span>
+                    </div>
+                    <div class="info-box border-glow">
+                        <div class="info-box-num">02</div>
+                        <h3 class="info-box-title">LATEST CS2 UPDATES</h3>
+                        <p class="info-box-text" style="font-size: 12px; line-height: 1.5; color: #8e9ca8;">
+                            - <strong>Train Reintroduced:</strong> Updated visuals &amp; site layouts.<br>
+                            - <strong>The Armory Pass:</strong> Weapon Charms &amp; Collections.<br>
+                            - <strong>Jump-throw Standardization:</strong> Consistent mechanics.
+                        </p>
+                        <span class="info-box-link" onclick="window.open('https://www.counter-strike.net/news', '_blank')">READ VALVE LOGS &rarr;</span>
+                    </div>
+                    <div class="info-box border-glow" onclick="openDropdownFromBox()">
+                        <div class="info-box-num">03</div>
+                        <h3 class="info-box-title">NAVIGATION ACCESS</h3>
+                        <p class="info-box-text">Access the main operations drop menu for Map rosters, About coordinates, and Comms links.</p>
+                        <span class="info-box-link">OPEN MENU &rarr;</span>
+                    </div>
+                </div>
+
+                <!-- Global Comments Section -->
+                <div class="home-comments-container border-glow" style="width:100%; margin-top: 50px;">
+                    <div class="about-card-corner top-left"></div>
+                    <div class="about-card-corner top-right"></div>
+                    <div class="about-card-corner bottom-left"></div>
+                    <div class="about-card-corner bottom-right"></div>
+                    
+                    <h2 class="section-title">TACTICAL CHATLOG / COMMENTS</h2>
+                    
+                    <div class="comments-list" id="comments-list" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                        <!-- Loaded dynamically -->
+                    </div>
+                    
+                    <form id="comment-form" class="comment-form" onsubmit="submitComment(event)">
+                        <div class="form-field">
+                            <textarea class="form-input" id="comment-text" rows="3" placeholder="Enter tactical update..." required></textarea>
+                        </div>
+                        <button class="form-submit-btn" type="submit" style="width: auto; align-self: flex-end; padding: 10px 25px;">SUBMIT LOG</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── VIEW 1.5: ABOUT US ───────────────────────── -->
+        <section id="view-about" class="view-section">
+            <div class="about-view-container">
+                <button class="back-btn" id="about-back-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+                    </svg>
+                    <span>RETURN TO HQ</span>
+                </button>
 
                 <div class="about-card">
                     <div class="about-card-corner top-left"></div>
@@ -90,7 +173,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
+<<<<<<< HEAD
                 <div class="cta-container">
                     <button class="cta-button" id="choose-map-btn">
                         <span class="cta-btn-text">CHOOSE MAP</span>
@@ -101,6 +187,44 @@
                         </span>
                         <span class="cta-glow-effect"></span>
                     </button>
+=======
+        <!-- ── VIEW 1.6: CONTACTS ───────────────────────── -->
+        <section id="view-contacts" class="view-section">
+            <div class="contacts-view-container">
+                <button class="back-btn" id="contacts-back-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <path fill="currentColor" d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+                    </svg>
+                    <span>RETURN TO HQ</span>
+                </button>
+
+                <div class="contact-card">
+                    <div class="about-card-corner top-left"></div>
+                    <div class="about-card-corner top-right"></div>
+                    <div class="about-card-corner bottom-left"></div>
+                    <div class="about-card-corner bottom-right"></div>
+
+                    <h2 class="section-title">COMMS TERMINAL</h2>
+                    <p class="about-text">
+                        Establish a direct link with CS Tactical Hub Headquarters. Submit your suggestions, report system anomalies, or send your strategic utility lineups.
+                    </p>
+
+                    <form id="contact-form" class="contact-form" autocomplete="off" onsubmit="event.preventDefault(); alert('Message sent successfully!'); this.reset();">
+                        <div class="form-field">
+                            <label class="form-label" for="contact-name">OPERATOR NAME</label>
+                            <input class="form-input" id="contact-name" type="text" placeholder="Enter your callsign" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="contact-email">EMAIL ADDRESS</label>
+                            <input class="form-input" id="contact-email" type="email" placeholder="operator@secure.net" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="contact-message">TRANSMISSION CONTENT</label>
+                            <textarea class="form-input" id="contact-message" rows="5" placeholder="Type your message here..." required></textarea>
+                        </div>
+                        <button class="form-submit-btn" type="submit">SEND TRANSMISSION</button>
+                    </form>
+>>>>>>> df18de81165fa8ce6363b7a5eca7307df84b5a62
                 </div>
             </div>
         </section>
@@ -199,6 +323,23 @@
                 <div class="auth-field">
                     <label class="auth-label" for="auth-name">OPERATOR NAME</label>
                     <input class="auth-input" id="auth-name" type="text" placeholder="Enter your name" required>
+                </div>
+                <div class="auth-signup-fields" id="auth-signup-fields" style="display: none; margin-top: 15px;">
+                    <div class="auth-field" style="margin-bottom: 15px;">
+                        <label class="auth-label" for="auth-hours">IN-GAME HOURS</label>
+                        <input class="auth-input" id="auth-hours" type="number" min="0"
+                               placeholder="e.g. 500">
+                    </div>
+                    <div class="auth-field" style="margin-bottom: 15px;">
+                        <label class="auth-label" for="auth-faceit">FACEIT ELO</label>
+                        <input class="auth-input" id="auth-faceit" type="number" min="100" max="5000"
+                               placeholder="e.g. 1500">
+                    </div>
+                    <div class="auth-field" style="margin-bottom: 15px;">
+                        <label class="auth-label" for="auth-premier">PREMIER ELO</label>
+                        <input class="auth-input" id="auth-premier" type="number" min="0" max="35000"
+                               placeholder="e.g. 12000">
+                    </div>
                 </div>
                 <div class="auth-message" id="auth-message"></div>
                 <button class="auth-submit-btn" id="auth-submit" type="submit">

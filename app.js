@@ -316,24 +316,22 @@ function switchView(targetView) {
     const views = {
         home: document.getElementById('view-home'),
         maps: document.getElementById('view-maps'),
-        'map-detail': document.getElementById('view-map-detail')
+        'map-detail': document.getElementById('view-map-detail'),
+        about: document.getElementById('view-about'),
+        contacts: document.getElementById('view-contacts')
     };
     const navHome = document.getElementById('nav-home');
-    const navMaps = document.getElementById('nav-maps');
 
     // Deactivate all
     Object.values(views).forEach(v => { if (v) { v.classList.remove('active'); } });
-    navHome.classList.remove('active');
-    navMaps.classList.remove('active');
+    if (navHome) navHome.classList.remove('active');
 
     // Activate target
     if (views[targetView]) {
         views[targetView].classList.add('active');
     }
 
-    if (targetView === 'home')       { navHome.classList.add('active'); }
-    if (targetView === 'maps')       { navMaps.classList.add('active'); }
-    if (targetView === 'map-detail') { navMaps.classList.add('active'); }
+    if (targetView === 'home' && navHome) { navHome.classList.add('active'); }
 
     state.currentView = targetView;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -645,8 +643,22 @@ async function showSavedLineups(mapId) {
     var rows = '';
     for (var i = 0; i < lineups.length; i++) {
         var l = lineups[i];
+        var authorBadge = '';
+        if (l.creatorName) {
+            authorBadge = '<div class="lineup-author-row">' +
+                '<span class="lineup-author-name">' + l.creatorName + '</span>' +
+                '<span class="operator-stats-badge">' +
+                    '<span class="stat-pill"><span class="stat-pill-label">HRS</span> <span class="stat-pill-val">' + (l.creatorHours || 0) + '</span></span>' +
+                    '<span class="stat-pill"><span class="stat-pill-label">FACEIT</span> <span class="stat-pill-val">' + (l.creatorFaceit || 0) + '</span></span>' +
+                    '<span class="stat-pill"><span class="stat-pill-label">PREMIER</span> <span class="stat-pill-val">' + (l.creatorPremier || 0) + '</span></span>' +
+                '</span>' +
+            '</div>';
+        }
         rows += '<tr>' +
-            '<td style="padding: 8px; border-bottom: 1px solid #333; color: #fff;">' + l.name + '</td>' +
+            '<td style="padding: 8px; border-bottom: 1px solid #333;">' +
+                '<div style="color: #fff; font-weight: 600;">' + l.name + '</div>' +
+                authorBadge +
+            '</td>' +
             '<td style="padding: 8px; border-bottom: 1px solid #333; color: #e8a045;">' + l.type + '</td>' +
             '<td style="padding: 8px; border-bottom: 1px solid #333; color: #aaa;">' + l.position + '</td>' +
             '<td style="padding: 8px; border-bottom: 1px solid #333; color: #aaa;">' + l.description + '</td>' +
@@ -658,7 +670,7 @@ async function showSavedLineups(mapId) {
 
     container.innerHTML = '<table style="width: 100%; border-collapse: collapse; color: #ccc;">' +
         '<thead><tr style="color: #e8a045; text-align: left;">' +
-        '<th style="padding: 8px;">NAME</th>' +
+        '<th style="padding: 8px;">NAME / OPERATOR</th>' +
         '<th style="padding: 8px;">TYPE</th>' +
         '<th style="padding: 8px;">POSITION</th>' +
         '<th style="padding: 8px;">DESCRIPTION</th>' +
@@ -668,32 +680,41 @@ async function showSavedLineups(mapId) {
 
 // Show a simple form to add a new lineup
 async function addLineup(mapId) {
-    var name        = window.prompt('Lineup name (e.g. "CT Smoke"):');
-    if (!name) return; // user pressed cancel
+    var name = window.prompt('Lineup name (e.g. "CT Smoke"):');
+    if (!name) return;
 
-    var type        = window.prompt('Type (Smoke / Flash / Molotov):');
+    var type = window.prompt('Type (Smoke / Flash / Molotov):');
     if (!type) return;
 
-    var position    = window.prompt('Throw position (where you stand):');
+    var position = window.prompt('Throw position (where you stand):');
     if (!position) return;
 
     var description = window.prompt('Description (what it does):');
     if (!description) return;
 
-    // Send the lineup to the backend using GET query parameters (server.get)
+    // Grab current user stats to attach to lineup
+    var user = (typeof AuthUI !== 'undefined' && AuthUI.currentUser) ? AuthUI.currentUser : null;
+    var creatorName    = user ? user.name       : 'Anonymous';
+    var creatorHours   = user ? (user.hours   || 0) : 0;
+    var creatorFaceit  = user ? (user.faceitElo  || 0) : 0;
+    var creatorPremier = user ? (user.premierElo || 0) : 0;
+
     try {
         var url = 'http://localhost:3000/api/lineups/' + mapId + '/add' +
-            '?name=' + encodeURIComponent(name) +
-            '&type=' + encodeURIComponent(type) +
-            '&position=' + encodeURIComponent(position) +
-            '&description=' + encodeURIComponent(description);
-        
+            '?name='           + encodeURIComponent(name) +
+            '&type='           + encodeURIComponent(type) +
+            '&position='       + encodeURIComponent(position) +
+            '&description='    + encodeURIComponent(description) +
+            '&creatorName='    + encodeURIComponent(creatorName) +
+            '&creatorHours='   + encodeURIComponent(creatorHours) +
+            '&creatorFaceit='  + encodeURIComponent(creatorFaceit) +
+            '&creatorPremier=' + encodeURIComponent(creatorPremier);
+
         await fetch(url);
     } catch (e) {
         console.error("Error adding lineup to server", e);
     }
 
-    // Refresh the list on screen
     await showSavedLineups(mapId);
 }
 
@@ -707,15 +728,148 @@ async function deleteLineup(mapId, index) {
     await showSavedLineups(mapId);
 }
 
+// ─── COMMENTS SYSTEM ────────────────────────────────────────────────────────
+
+function buildStatsBadge(item) {
+    if (!item.creatorName) return '';
+    return '<span class="operator-stats-badge">' +
+        '<span class="stat-pill"><span class="stat-pill-label">HRS</span> <span class="stat-pill-val">' + (item.creatorHours || 0) + '</span></span>' +
+        '<span class="stat-pill"><span class="stat-pill-label">FACEIT</span> <span class="stat-pill-val">' + (item.creatorFaceit || 0) + '</span></span>' +
+        '<span class="stat-pill"><span class="stat-pill-label">PREMIER</span> <span class="stat-pill-val">' + (item.creatorPremier || 0) + '</span></span>' +
+        '</span>';
+}
+
+async function loadComments() {
+    var container = document.getElementById('comments-list');
+    var form = document.getElementById('comment-form');
+    if (!container) return;
+
+    try {
+        var res = await fetch('http://localhost:3000/api/comments');
+        if (res.ok) {
+            var comments = await res.json();
+            if (comments.length === 0) {
+                container.innerHTML = '';
+            } else {
+                container.innerHTML = comments.map(function(c) {
+                    var d = new Date(c.timestamp);
+                    var ts = d.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+                    return '<div class="comment-item">' +
+                        '<div class="comment-header">' +
+                            '<span class="comment-author">' + c.creatorName + '</span>' +
+                            buildStatsBadge(c) +
+                            '<span class="comment-timestamp">' + ts + '</span>' +
+                        '</div>' +
+                        '<p class="comment-text">' + c.text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' +
+                    '</div>';
+                }).join('');
+            }
+        }
+    } catch (e) {
+        container.innerHTML = '<p style="color:#536473; font-family: Rajdhani, sans-serif;">Server offline — comments unavailable.</p>';
+    }
+
+    // Show/hide comment form based on login state
+    if (form) {
+        var user = (typeof AuthUI !== 'undefined') ? AuthUI.currentUser : null;
+        if (user) {
+            form.style.display = 'flex';
+        } else {
+            form.style.display = 'none';
+            var locked = document.getElementById('comment-locked');
+            if (!locked) {
+                var msg = document.createElement('p');
+                msg.id = 'comment-locked';
+                msg.className = 'comment-locked-msg';
+                msg.textContent = '⚡ Log in to broadcast your tactical transmission.';
+                container.after(msg);
+            }
+        }
+    }
+}
+
+async function submitComment(e) {
+    e.preventDefault();
+    var user = (typeof AuthUI !== 'undefined') ? AuthUI.currentUser : null;
+    if (!user) { alert('You must be logged in to post a comment.'); return; }
+
+    var text = document.getElementById('comment-text').value.trim();
+    if (!text) return;
+
+    try {
+        var url = 'http://localhost:3000/api/comments/add' +
+            '?text='           + encodeURIComponent(text) +
+            '&creatorName='    + encodeURIComponent(user.name) +
+            '&creatorHours='   + encodeURIComponent(user.hours   || 0) +
+            '&creatorFaceit='  + encodeURIComponent(user.faceitElo  || 0) +
+            '&creatorPremier=' + encodeURIComponent(user.premierElo || 0);
+        await fetch(url);
+        document.getElementById('comment-text').value = '';
+        await loadComments();
+    } catch (e) {
+        alert('Could not reach the server. Make sure the backend is running.');
+    }
+}
+
+// ─── DROPDOWN TRIGGER FROM CARD ──────────────────────────────────────────────
+
+function openDropdownFromBox() {
+    var container = document.querySelector('.nav-dropdown-container');
+    if (container) {
+        container.classList.toggle('open');
+        // Scroll user up to the navbar so they can see the dropdown
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
 // ─── NAVIGATION SETUP ────────────────────────────────────────────────────────
 
 function setupNavigation() {
     document.getElementById('nav-home')?.addEventListener('click', () => { window.location.hash = 'home'; });
-    document.getElementById('nav-maps')?.addEventListener('click', () => { window.location.hash = 'maps'; });
     document.getElementById('logo-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
-    document.getElementById('choose-map-btn')?.addEventListener('click', () => { window.location.hash = 'maps'; });
+    document.getElementById('about-back-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
+    document.getElementById('contacts-back-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
     document.getElementById('back-to-home-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
     document.getElementById('back-to-maps-btn')?.addEventListener('click', () => { window.location.hash = 'maps'; });
+}
+
+// ─── DROPDOWN MENU SETUP ─────────────────────────────────────────────────────
+
+function setupDropdownMenu() {
+    const menuBtn = document.getElementById('nav-menu-btn');
+    const dropdownContainer = document.querySelector('.nav-dropdown-container');
+    
+    if (menuBtn && dropdownContainer) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownContainer.classList.toggle('open');
+        });
+        
+        document.addEventListener('click', () => {
+            dropdownContainer.classList.remove('open');
+        });
+        
+        const dropdownItems = dropdownContainer.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', () => {
+                dropdownContainer.classList.remove('open');
+            });
+        });
+    }
+}
+
+// ─── BACKGROUND SLIDESHOW ────────────────────────────────────────────────────
+
+function initBackgroundSlideshow() {
+    const slides = document.querySelectorAll('.home-background-slideshow .slide');
+    if (slides.length === 0) return;
+    
+    let currentSlide = 0;
+    setInterval(() => {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }, 5000);
 }
 
 // ─── ROUTER ──────────────────────────────────────────────────────────────────
@@ -726,6 +880,10 @@ function handleRouting() {
         switchView('home');
     } else if (hash === '#maps') {
         switchView('maps');
+    } else if (hash === '#about') {
+        switchView('about');
+    } else if (hash === '#contacts') {
+        switchView('contacts');
     } else if (hash.startsWith('#map-')) {
         const mapId = hash.replace('#map-', '');
         openMapDetail(mapId);
@@ -739,15 +897,23 @@ function handleRouting() {
 document.addEventListener('DOMContentLoaded', () => {
     buildMapGrid();
     setupNavigation();
+    setupDropdownMenu();
+    initBackgroundSlideshow();
     window.addEventListener('hashchange', handleRouting);
     handleRouting();
     if (typeof AuthUI !== 'undefined') {
         AuthUI.init();
     }
+    loadComments();
     console.log('%c[TACTICAL SECURE CHANNEL] // CS Tactical Hub Initialized. 16 maps loaded.', 'color: #00ff66; font-weight: bold;');
 });
 
+<<<<<<< HEAD
 // ─── ADD TACTICAL INTEL FORM SUBMISSION ──────────────────────────────────────
+=======
+
+// ─── ADD INFO FORM ─────────────────────────────────────────────────────────
+>>>>>>> df18de81165fa8ce6363b7a5eca7307df84b5a62
 
 /**
  * Handles the submission of the Map Intel form.
