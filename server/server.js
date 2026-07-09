@@ -3,7 +3,7 @@ const cors = require('cors');
 const server = express();
 const PORT = 3000;
 
-server.use(cors({ origin: 'http://localhost:8000' }));
+server.use(cors());
 server.use(express.json());
 
 const accounts = [];
@@ -60,6 +60,10 @@ function handleSignup(req, res) {
         faceitElo: parseInt(faceitElo, 10),
         premierElo: parseInt(premierElo, 10)
     };
+
+    if (isNaN(newUser.hours) || isNaN(newUser.faceitElo) || isNaN(newUser.premierElo)) {
+        return res.status(400).json({ error: 'Hours, Faceit Elo, and Premier Elo must be valid numbers.' });
+    }
 
     accounts.push(newUser);
     return res.json({ success: true, user: newUser });

@@ -769,11 +769,13 @@ async function loadComments() {
         container.innerHTML = '<p style="color:#536473; font-family: Rajdhani, sans-serif;">Server offline — comments unavailable.</p>';
     }
 
-    // Show/hide comment form based on login state
     if (form) {
         var user = (typeof AuthUI !== 'undefined') ? AuthUI.currentUser : null;
         if (user) {
             form.style.display = 'flex';
+            // Remove the "login to comment" message if it is present
+            var locked = document.getElementById('comment-locked');
+            if (locked) locked.remove();
         } else {
             form.style.display = 'none';
             var locked = document.getElementById('comment-locked');

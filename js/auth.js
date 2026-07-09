@@ -165,7 +165,7 @@ const AuthUI = {
                             this.setSubmitState(false, mode);
                             return;
                         }
-                        if (!faceitElo) {
+                        if (!faceitElo && faceitElo !== 0) {
                             this.showMessage('Faceit Elo is required.', true);
                             this.setSubmitState(false, mode);
                             return;
