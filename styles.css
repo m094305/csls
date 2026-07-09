@@ -1063,4 +1063,159 @@ html, body {
     }
 }
 
+/* ==========================================================================
+   ADD MAP INFORMATION FORM (Tactical HUD Styling)
+   ========================================================================== */
 
+/* Toggle button that opens the form */
+#add-info-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 10px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 25px;
+    transition: all 0.3s var(--transition-curve);
+    /* Clipped corners design typical of the CS Tactical theme */
+    clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+}
+
+#add-info-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-orange);
+    background-color: var(--bg-secondary);
+    box-shadow: 0 0 12px var(--accent-orange-dim);
+}
+
+/* Tactical Panel container for the form */
+#add-info-form {
+    background-color: rgba(16, 21, 28, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+    padding: 35px 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    max-width: 550px;
+    position: relative;
+    /* Clipped corners matching the active cards */
+    clip-path: polygon(12px 0%, 100% 0%, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0% 100%, 0% 12px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 15px var(--accent-orange-dim);
+}
+
+/* Title for the form panel */
+#add-info-form h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    color: var(--accent-orange);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px var(--accent-orange-glow);
+}
+
+/* Individual field container wrapper */
+.add-info-field {
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Field label styles */
+.add-info-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Custom styled text input and text area */
+.add-info-input,
+.add-info-textarea {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+}
+
+.add-info-input:focus,
+.add-info-textarea:focus {
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 12px var(--accent-orange-dim);
+}
+
+.add-info-input::placeholder,
+.add-info-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.add-info-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Action button area */
+.add-info-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+/* Submit Intel Button (Filled Accent Style) */
+.add-info-submit-btn {
+    background-color: var(--accent-orange);
+    border: none;
+    color: var(--bg-primary);
+    padding: 12px 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-curve);
+    clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+    text-transform: uppercase;
+}
+
+.add-info-submit-btn:hover {
+    background-color: #ff8533;
+    box-shadow: 0 0 15px var(--accent-orange-glow);
+}
+
+/* Cancel Button (Outlined/Secondary Style) */
+.add-info-cancel-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 12px 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-curve);
+    clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+    text-transform: uppercase;
+}
+
+.add-info-cancel-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-orange);
+    background-color: rgba(255, 107, 0, 0.05);
+}

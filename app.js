@@ -747,18 +747,28 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('%c[TACTICAL SECURE CHANNEL] // CS Tactical Hub Initialized. 16 maps loaded.', 'color: #00ff66; font-weight: bold;');
 });
 
-// ─── ADD INFO FORM ─────────────────────────────────────────────────────────
+// ─── ADD TACTICAL INTEL FORM SUBMISSION ──────────────────────────────────────
 
+/**
+ * Handles the submission of the Map Intel form.
+ * It reads user input values, checks for basic validation, triggers a confirmation alert, 
+ * hides the form container, and clears the form's fields for subsequent uses.
+ */
 function submitInfo() {
-    var mapName = document.getElementById('input-map-name').value;
-    var info = document.getElementById('input-info').value;
+    // 1. Retrieve current text values entered by the user
+    var mapName = document.getElementById('input-map-name').value.trim();
+    var info = document.getElementById('input-info').value.trim();
 
-    if (mapName == '' || info == '') {
+    // 2. Client-side Validation: Verify that both fields have text content
+    if (mapName === '' || info === '') {
         alert('Please fill in all fields!');
-        return;
+        return; // Halt execution if requirements are not met
     }
 
+    // 3. User Feedback: Confirm that the tactical data is successfully recorded
     alert('Info saved for: ' + mapName);
+
+    // 4. UI Cleanup: Hide the form panel and reset all input elements
     document.getElementById('add-info-form').style.display = 'none';
     document.getElementById('input-map-name').value = '';
     document.getElementById('input-info').value = '';
