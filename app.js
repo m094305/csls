@@ -831,6 +831,7 @@ function setupNavigation() {
     document.getElementById('contacts-back-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
     document.getElementById('back-to-home-btn')?.addEventListener('click', () => { window.location.hash = 'home'; });
     document.getElementById('back-to-maps-btn')?.addEventListener('click', () => { window.location.hash = 'maps'; });
+    document.getElementById('choose-map-btn')?.addEventListener('click', () => { window.location.hash = 'maps'; });
 }
 
 // ─── DROPDOWN MENU SETUP ─────────────────────────────────────────────────────
@@ -908,12 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('%c[TACTICAL SECURE CHANNEL] // CS Tactical Hub Initialized. 16 maps loaded.', 'color: #00ff66; font-weight: bold;');
 });
 
-<<<<<<< HEAD
 // ─── ADD TACTICAL INTEL FORM SUBMISSION ──────────────────────────────────────
-=======
-
-// ─── ADD INFO FORM ─────────────────────────────────────────────────────────
->>>>>>> df18de81165fa8ce6363b7a5eca7307df84b5a62
 
 /**
  * Handles the submission of the Map Intel form.
