@@ -1,0 +1,30 @@
+{
+    "accounts": [
+        {
+            "id": 1,
+            "name": "DatabaseTester",
+            "hours": 500,
+            "faceitElo": 1500,
+            "premierElo": 12000
+        },
+        {
+            "id": 2,
+            "name": "mk",
+            "hours": 500,
+            "faceitElo": 2,
+            "premierElo": 0
+        }
+    ],
+    "customLineups": {},
+    "comments": [
+        {
+            "id": 1,
+            "text": "HI",
+            "timestamp": "2026-07-10T07:58:03.785Z",
+            "creatorName": "mk",
+            "creatorHours": 500,
+            "creatorFaceit": 2,
+            "creatorPremier": 0
+        }
+    ]
+}

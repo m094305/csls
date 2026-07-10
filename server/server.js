@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const db = require('./db');
+
 const server = express();
 const PORT = 3000;
 
 server.use(cors());
 server.use(express.json());
-
-const accounts = [];
 
 function handleLogin(req, res) {
     const nameTyped = req.body.name || req.query.name;
@@ -15,6 +15,7 @@ function handleLogin(req, res) {
         return res.status(400).json({ error: 'Name is required.' });
     }
 
+    const accounts = db.getAccounts();
     let foundUser = null;
     for (let i = 0; i < accounts.length; i++) {
         if (accounts[i].name === nameTyped) {
@@ -42,6 +43,7 @@ function handleSignup(req, res) {
         return res.status(400).json({ error: 'In-game hours, Faceit Elo, and Premier Elo are required.' });
     }
 
+    const accounts = db.getAccounts();
     let nameExists = false;
     for (let i = 0; i < accounts.length; i++) {
         if (accounts[i].name === nameTyped) {
@@ -65,16 +67,13 @@ function handleSignup(req, res) {
         return res.status(400).json({ error: 'Hours, Faceit Elo, and Premier Elo must be valid numbers.' });
     }
 
-    accounts.push(newUser);
+    db.addAccount(newUser);
     return res.json({ success: true, user: newUser });
 }
 
-// In-memory custom lineups dictionary (mapId -> array of lineups)
-const customLineups = {};
-
 function getLineups(req, res) {
     const { mapId } = req.params;
-    const list = customLineups[mapId] || [];
+    const list = db.getLineups(mapId);
     return res.json(list);
 }
 
@@ -93,10 +92,6 @@ function addLineup(req, res) {
         return res.status(400).json({ error: 'All fields (name, type, position, description) are required.' });
     }
 
-    if (!customLineups[mapId]) {
-        customLineups[mapId] = [];
-    }
-
     const newLineup = { 
         name, 
         type, 
@@ -107,26 +102,20 @@ function addLineup(req, res) {
         creatorFaceit: parseInt(creatorFaceit, 10),
         creatorPremier: parseInt(creatorPremier, 10)
     };
-    customLineups[mapId].push(newLineup);
-    return res.json({ success: true, lineups: customLineups[mapId] });
+
+    const list = db.addLineup(mapId, newLineup);
+    return res.json({ success: true, lineups: list });
 }
 
 function deleteLineup(req, res) {
     const { mapId, index } = req.params;
-    const list = customLineups[mapId] || [];
     const idx = parseInt(index, 10);
-
-    if (idx >= 0 && idx < list.length) {
-        list.splice(idx, 1);
-    }
+    const list = db.deleteLineup(mapId, idx);
     return res.json({ success: true, lineups: list });
 }
 
-// Comments Storage & Handlers
-const comments = [];
-
 function getComments(req, res) {
-    return res.json(comments);
+    return res.json(db.getComments());
 }
 
 function addComment(req, res) {
@@ -140,8 +129,9 @@ function addComment(req, res) {
         return res.status(400).json({ error: 'Comment text is required.' });
     }
 
+    const commentsList = db.getComments();
     const newComment = {
-        id: comments.length + 1,
+        id: commentsList.length + 1,
         text,
         timestamp: new Date().toISOString(),
         creatorName,
@@ -149,8 +139,8 @@ function addComment(req, res) {
         creatorFaceit: parseInt(creatorFaceit, 10),
         creatorPremier: parseInt(creatorPremier, 10)
     };
-    comments.push(newComment);
-    return res.json({ success: true, comments });
+    const list = db.addComment(newComment);
+    return res.json({ success: true, comments: list });
 }
 
 server.post('/api/login', handleLogin);
