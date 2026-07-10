@@ -919,21 +919,98 @@ document.addEventListener('DOMContentLoaded', () => {
  * hides the form container, and clears the form's fields for subsequent uses.
  */
 function submitInfo() {
-    // 1. Retrieve current text values entered by the user
     var mapName = document.getElementById('input-map-name').value.trim();
     var info = document.getElementById('input-info').value.trim();
 
-    // 2. Client-side Validation: Verify that both fields have text content
     if (mapName === '' || info === '') {
         alert('Please fill in all fields!');
-        return; // Halt execution if requirements are not met
+        return;
     }
 
-    // 3. User Feedback: Confirm that the tactical data is successfully recorded
     alert('Info saved for: ' + mapName);
 
-    // 4. UI Cleanup: Hide the form panel and reset all input elements
     document.getElementById('add-info-form').style.display = 'none';
     document.getElementById('input-map-name').value = '';
     document.getElementById('input-info').value = '';
+}
+
+// ─── COMMENTS ────────────────────────────────────────────────────────────────
+
+async function loadComments() {
+    const list = document.getElementById('comments-list');
+    if (!list) return;
+    try {
+        const res = await fetch('http://localhost:3000/api/comments');
+        const comments = await res.json();
+        const currentUser = (typeof AuthUI !== 'undefined' && AuthUI.currentUser)
+            ? AuthUI.currentUser.name : null;
+
+        if (comments.length === 0) {
+            list.innerHTML = '<p style="color:#888; font-size:0.85rem; padding: 10px 0;">No tactical updates yet. Be the first.</p>';
+            return;
+        }
+
+        list.innerHTML = comments.map(c => {
+            const name = c.author || c.creatorName || 'Unknown';
+            const canDelete = currentUser && currentUser === name;
+            return `
+            <div class="comment-item" style="border-bottom: 1px solid #1e2d1e; padding: 12px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                <div>
+                    <span style="color: #00ff66; font-weight: bold; font-size: 0.8rem;">${name}</span>
+                    <span style="color: #445544; font-size: 0.75rem; margin-left: 10px;">${new Date(c.timestamp).toLocaleString()}</span>
+                    <p style="margin: 6px 0 0; color: #ccc; font-size: 0.9rem;">${c.text}</p>
+                </div>
+                ${canDelete ? `
+                <button onclick="deleteComment(${c.id})" style="
+                    background: none;
+                    border: 1px solid #ff3333;
+                    color: #ff3333;
+                    border-radius: 4px;
+                    padding: 4px 10px;
+                    font-size: 0.75rem;
+                    cursor: pointer;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                " onmouseover="this.style.background='#ff3333';this.style.color='#000'"
+                   onmouseout="this.style.background='none';this.style.color='#ff3333'">
+                    DELETE
+                </button>` : ''}
+            </div>`;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load comments:', err);
+    }
+}
+
+async function submitComment(event) {
+    event.preventDefault();
+    const currentUser = (typeof AuthUI !== 'undefined' && AuthUI.currentUser)
+        ? AuthUI.currentUser : null;
+    if (!currentUser) {
+        alert('You must be logged in to post a comment.');
+        return;
+    }
+    const text = document.getElementById('comment-text').value.trim();
+    if (!text) return;
+
+    try {
+        await fetch('http://localhost:3000/api/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ author: currentUser.name, text })
+        });
+        document.getElementById('comment-text').value = '';
+        loadComments();
+    } catch (err) {
+        alert('Failed to post comment. Make sure the backend is running.');
+    }
+}
+
+async function deleteComment(id) {
+    try {
+        await fetch(`http://localhost:3000/api/comments/delete/${id}`);
+        loadComments();
+    } catch (err) {
+        alert('Failed to delete comment.');
+    }
 }

@@ -120,26 +120,25 @@ function getComments(req, res) {
 
 function addComment(req, res) {
     const text = req.body.text || req.query.text;
-    const creatorName = req.body.creatorName || req.query.creatorName || 'Anonymous';
-    const creatorHours = req.body.creatorHours || req.query.creatorHours || '0';
-    const creatorFaceit = req.body.creatorFaceit || req.query.creatorFaceit || '0';
-    const creatorPremier = req.body.creatorPremier || req.query.creatorPremier || '0';
+    const author = req.body.author || req.query.author || 'Anonymous';
 
     if (!text) {
         return res.status(400).json({ error: 'Comment text is required.' });
     }
 
-    const commentsList = db.getComments();
     const newComment = {
-        id: commentsList.length + 1,
+        id: Date.now(),
         text,
-        timestamp: new Date().toISOString(),
-        creatorName,
-        creatorHours: parseInt(creatorHours, 10),
-        creatorFaceit: parseInt(creatorFaceit, 10),
-        creatorPremier: parseInt(creatorPremier, 10)
+        author,
+        timestamp: new Date().toISOString()
     };
     const list = db.addComment(newComment);
+    return res.json({ success: true, comments: list });
+}
+
+function deleteComment(req, res) {
+    const id = parseInt(req.params.id, 10);
+    const list = db.deleteComment(id);
     return res.json({ success: true, comments: list });
 }
 
@@ -159,6 +158,8 @@ server.get('/api/lineups/:mapId/delete/:index', deleteLineup);
 server.get('/api/comments', getComments);
 server.post('/api/comments', addComment);
 server.get('/api/comments/add', addComment);
+server.post('/api/comments/delete/:id', deleteComment);
+server.get('/api/comments/delete/:id', deleteComment);
 
 server.listen(PORT, function () {
     console.log("Server is running on port 3000!");

@@ -3,14 +3,12 @@ const path = require('path');
 
 const DB_FILE = path.join(__dirname, 'db.json');
 
-// Memory cache
 let dbData = {
     accounts: [],
     customLineups: {},
     comments: []
 };
 
-// Load database from file
 function loadDB() {
     try {
         if (!fs.existsSync(DB_FILE)) {
@@ -24,7 +22,6 @@ function loadDB() {
     }
 }
 
-// Save database to file
 function saveDB() {
     try {
         fs.writeFileSync(DB_FILE, JSON.stringify(dbData, null, 4), 'utf8');
@@ -33,11 +30,9 @@ function saveDB() {
     }
 }
 
-// Initialize database on import
 loadDB();
 
 module.exports = {
-    // Accounts
     getAccounts() {
         return dbData.accounts;
     },
@@ -47,7 +42,6 @@ module.exports = {
         return user;
     },
 
-    // Custom Lineups
     getLineups(mapId) {
         return dbData.customLineups[mapId] || [];
     },
@@ -68,13 +62,20 @@ module.exports = {
         return list;
     },
 
-    // Comments
     getComments() {
         return dbData.comments;
     },
     addComment(comment) {
         dbData.comments.push(comment);
         saveDB();
+        return dbData.comments;
+    },
+    deleteComment(id) {
+        const index = dbData.comments.findIndex(c => c.id === id);
+        if (index !== -1) {
+            dbData.comments.splice(index, 1);
+            saveDB();
+        }
         return dbData.comments;
     }
 };
